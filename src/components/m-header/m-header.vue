@@ -23,6 +23,7 @@
     text-align center
     color $color-theme
     font-size 0
+    display block
     .icon
       display inline-block
       vertical-align top
