@@ -6,7 +6,7 @@ import fastclick from 'fastclick'
 
 import 'common/stylus/index.styl'
 
-fastclick.attach(document.body);
+fastclick.attach(document.body)
 
 /* eslint-disable no-new */
 new Vue({

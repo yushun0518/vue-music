@@ -1,7 +1,7 @@
 <template>
-  <div>
-    signer页面
-  </div>
+    <div>
+        页面
+    </div>
 </template>
 
 <script type="text/ecmascript-6">
