@@ -1,12 +1,12 @@
 <template>
-  <dvi class="m-header">
+  <div class="m-header">
     <div class="icon">
 
     </div>
     <h1 class="text">
       Chicken Music
     </h1>
-  </dvi>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
