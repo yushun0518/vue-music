@@ -1,7 +1,6 @@
 <template>
   <div class="recommend">
       <div class="recommend-content">
-        {{ recommends.length }}
           <div v-if="recommends.length" class="slider-wrapper">
             <slider>
               <div v-for="item in recommends">
