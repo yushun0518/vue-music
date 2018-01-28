@@ -1,3 +1,21 @@
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Marketplace
+Explore
+@yushun0518
+Sign out
+Watch 5
+Fork 65 k-water/vue-music
+Code  Issues 6  Pull requests 0  Projects 0  Wiki  Insights
+Branch: master Find file Copy pathvue-music/build/dev-server.js
+f21d5d2  on 17 Oct 2017
+@k-water k-water fix: recoomend getSongList referer
+1 contributor
+RawBlameHistory
+162 lines (138 sloc)  4.13 KB
 require('./check-versions')()
 
 var config = require('../config')
@@ -9,9 +27,11 @@ var opn = require('opn')
 var path = require('path')
 var express = require('express')
 var webpack = require('webpack')
-var proxyMiddleware = require('http-proxy-middleware')
-var webpackConfig = require('./webpack.dev.conf')
 var axios = require('axios')
+var proxyMiddleware = require('http-proxy-middleware')
+var webpackConfig = process.env.NODE_ENV === 'testing' ?
+  require('./webpack.prod.conf') :
+  require('./webpack.dev.conf')
 
 // default port where dev server listens for incoming traffic
 var port = process.env.PORT || config.dev.port
@@ -22,34 +42,35 @@ var autoOpenBrowser = !!config.dev.autoOpenBrowser
 var proxyTable = config.dev.proxyTable
 
 var app = express()
+var compiler = webpack(webpackConfig)
 
+//  抓取qq音乐推荐歌单列表 后端代理 设置headers
 var apiRoutes = express.Router()
-
-apiRoutes.get('/getDiscList', function (req, res) {
+apiRoutes.get('/getDiscList', function(req, res) {
   var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+
   axios.get(url, {
     headers: {
-      referer: 'https://c.y.qq.com/',
+      referer: 'https://c.y.qq.com',
       host: 'c.y.qq.com'
     },
     params: req.query
-  }).then((response) => {
+  }).then(response => {
     res.json(response.data)
-  }).catch((e) => {
-    console.log(e)
+  }).catch(error => {
+    console.log(error)
   })
 })
-
-apiRoutes.get('/lyric', function (req, res) {
+apiRoutes.get('/lyric', function(req, res) {
   var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
 
   axios.get(url, {
     headers: {
-      referer: 'https://c.y.qq.com/',
+      referer: 'https://c.y.qq.com',
       host: 'c.y.qq.com'
     },
     params: req.query
-  }).then((response) => {
+  }).then(response => {
     var ret = response.data
     if (typeof ret === 'string') {
       var reg = /^\w+\(({[^()]+})\)$/
@@ -59,14 +80,38 @@ apiRoutes.get('/lyric', function (req, res) {
       }
     }
     res.json(ret)
-  }).catch((e) => {
-    console.log(e)
+  }).catch(error => {
+    console.log(error)
   })
 })
 
-app.use('/api', apiRoutes)
+apiRoutes.get('/getSongList', function (req, res) {
+  var url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+  axios.get(url, {
+    headers: {
+      referer: 'https://c.y.qq.com/',
+      host: 'c.y.qq.com'
+    },
+    params: req.query
+  }).then((response) => {
+    var ret = response.data
+    // 返回的是JSONP格式的话
+    if (typeof ret === 'string') {
+      var reg = /^\w+\(({.+})\)$/
+      var matches = ret.match(reg)
+      if (matches) {
+        ret = JSON.parse(matches[1])
+      }
+    }
+    res.json(ret)
+  }).catch((e)=> {
+    console.log(e)
+  })
 
-var compiler = webpack(webpackConfig)
+})
+
+
+app.use('/api', apiRoutes)
 
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
@@ -77,15 +122,15 @@ var hotMiddleware = require('webpack-hot-middleware')(compiler, {
   log: () => {}
 })
 // force page reload when html-webpack-plugin template changes
-compiler.plugin('compilation', function (compilation) {
-  compilation.plugin('html-webpack-plugin-after-emit', function (data, cb) {
+compiler.plugin('compilation', function(compilation) {
+  compilation.plugin('html-webpack-plugin-after-emit', function(data, cb) {
     hotMiddleware.publish({ action: 'reload' })
     cb()
   })
 })
 
 // proxy api requests
-Object.keys(proxyTable).forEach(function (context) {
+Object.keys(proxyTable).forEach(function(context) {
   var options = proxyTable[context]
   if (typeof options === 'string') {
     options = { target: options }
