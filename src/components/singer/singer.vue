@@ -16,7 +16,7 @@
   export default {
     data() {
       return {
-        signers: []
+        singers: []
       }
     },
     created() {
@@ -27,7 +27,7 @@
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
             this.singers = this._normalizeSinger(res.data.list)
-            // console.log(this._normalizeSinger(this.singers))
+            // console.log(this.singers)
           }
         })
       },
